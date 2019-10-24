@@ -10,6 +10,7 @@ Sample codes using AWS services and serverless framework.
 ## Sample Applications
 
 <a name="lambda-image-processing"/>
+
 ### Lambda Image Processing
 
 #### About
@@ -34,6 +35,7 @@ This sample application uses:
 
 
 <a name="translate-text-from-image"/>
+
 ### Translate Text from Image
 
 #### About
