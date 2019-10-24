@@ -3,8 +3,8 @@ Sample codes using AWS services and serverless framework.
 
 ## Index
 
-1. [Lambda Image Processing] (#lambda-image-processing) 
-2. [Translate Text from Image] (#translate-text-from-image)
+1. [Lambda Image Processing](#lambda-image-processing) 
+2. [Translate Text from Image](#translate-text-from-image)
 
 
 ## Sample Applications
