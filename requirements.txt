@@ -1,0 +1,5 @@
+gspread
+Pillow
+oauth2client
+boto3
+facebook-sdk
