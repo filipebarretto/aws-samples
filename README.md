@@ -1,6 +1,13 @@
 # AWS Samples
 Sample codes using AWS services and serverless framework.
 
+## Index
+
+1. Lambda Image Processing
+2. Translate Text from Image
+
+
+## Sample Applications
 
 ### Lambda Image Processing
 
@@ -22,7 +29,7 @@ This sample application uses:
 
 #### Architecture
 
-![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/dev/architecture-diagrams/lambda-image-processing-achitecture.png?raw=true)
+![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/master/architecture-diagrams/lambda-image-processing-achitecture.png?raw=true)
 
 
 ### Translate Text from Image
@@ -39,3 +46,7 @@ This sample application uses:
 - AWS Lambda
 - Amazon Rekognition
 - Amazon Translate
+
+#### Architecture
+
+![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/master/architecture-diagrams/translate-text-from-image-architecture?raw=true)
