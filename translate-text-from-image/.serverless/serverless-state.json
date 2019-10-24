@@ -1,0 +1,437 @@
+{
+  "service": {
+    "service": "translate-text-from-image",
+    "serviceObject": {
+      "name": "translate-text-from-image"
+    },
+    "provider": {
+      "stage": "dev",
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._@'\",\\-\\/\\(\\)*]+?)}",
+      "name": "aws",
+      "profile": "lambda-image-processing",
+      "runtime": "python3.7",
+      "region": "us-east-1",
+      "deploymentBucket": "853202365172-translate-text-from-image-deployment-bucket-dev",
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "lambda:GetLayerVersion",
+            "lambda:PublishLayerVersion"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource": "arn:aws:logs:*:*:*"
+        }
+      ],
+      "versionFunctions": true,
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "TranslateLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/translate-text-from-image-dev-translate"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "dev",
+                        "translate-text-from-image",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/translate-text-from-image-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/translate-text-from-image-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "translate-text-from-image",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "TranslateLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "853202365172-translate-text-from-image-deployment-bucket-dev",
+                "S3Key": "serverless/translate-text-from-image/dev/1571907061003-2019-10-24T08:51:01.003Z/translate.zip"
+              },
+              "FunctionName": "translate-text-from-image-dev-translate",
+              "Handler": "src/translate.main",
+              "MemorySize": 128,
+              "Role": {
+                "Fn::GetAtt": [
+                  "TranslateIamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "python3.7",
+              "Timeout": 15,
+              "Description": "Uses Amazon Rekognition to read text in image and translates for the user",
+              "Environment": {
+                "Variables": {
+                  "ENV": "environment"
+                }
+              }
+            },
+            "DependsOn": [
+              "TranslateIamRoleLambdaExecution",
+              "TranslateLogGroup"
+            ]
+          },
+          "TranslateLambdaVersionpT7Dl0jcMlsZn27p3NmKkEfud6iYjEm7imqrQHA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "TranslateLambdaFunction"
+              },
+              "CodeSha256": "jpR0a3paAcWSRCbc9Dq2frf+3FLAFCAePNj3s18+LPA=",
+              "Description": "Uses Amazon Rekognition to read text in image and translates for the user"
+            }
+          },
+          "S3BucketTranslatetextfromimage853202365172dev": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "translate-text-from-image-853202365172-dev",
+              "NotificationConfiguration": {
+                "LambdaConfigurations": [
+                  {
+                    "Event": "s3:ObjectCreated:*",
+                    "Function": {
+                      "Fn::GetAtt": [
+                        "TranslateLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "Filter": {
+                      "S3Key": {
+                        "Rules": [
+                          {
+                            "Name": "prefix",
+                            "Value": "images/"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "DependsOn": [
+              "TranslateLambdaPermissionTranslatetextfromimage853202365172devS3"
+            ]
+          },
+          "TranslateLambdaPermissionTranslatetextfromimage853202365172devS3": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "TranslateLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "s3.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":s3:::translate-text-from-image-853202365172-dev"
+                  ]
+                ]
+              }
+            }
+          },
+          "TranslateIamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "dev",
+                        "translate-text-from-image",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/translate-text-from-image-dev-translate:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "lambda:GetLayerVersion",
+                          "lambda:PublishLayerVersion"
+                        ],
+                        "Resource": "*"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogGroup",
+                          "logs:CreateLogStream",
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": "arn:aws:logs:*:*:*"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "s3:GetObject",
+                          "s3:GetObjectVersion",
+                          "s3:ListBucket"
+                        ],
+                        "Resource": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:aws:s3:::",
+                              "translate-text-from-image-853202365172-dev",
+                              "/images/*"
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "rekognition:DetectText"
+                        ],
+                        "Resource": "*"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "translate:TranslateText",
+                          "comprehend:DetectDominantLanguage"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "translate-text-from-image",
+                    "dev",
+                    "translate",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              },
+              "ManagedPolicyArns": []
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "853202365172-translate-text-from-image-deployment-bucket-dev"
+          },
+          "TranslateLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "TranslateLambdaVersionpT7Dl0jcMlsZn27p3NmKkEfud6iYjEm7imqrQHA"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "pythonRequirements": {
+        "dockerizePip": "non-linux"
+      },
+      "stage": "dev",
+      "region": "us-east-1",
+      "user_name": "filipebarretto",
+      "deployment_bucket": "853202365172-translate-text-from-image-deployment-bucket-dev",
+      "account_id": "853202365172",
+      "bucket_images": "translate-text-from-image-853202365172-dev",
+      "bucket_arn": {
+        "Fn::Sub": "arn:aws:s3:::translate-text-from-image-853202365172-dev"
+      }
+    },
+    "plugins": [
+      "serverless-python-requirements",
+      "serverless-iam-roles-per-function",
+      "serverless-plugin-create-deployment-bucket",
+      "serverless-pseudo-parameters"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "translate": {
+        "handler": "src/translate.main",
+        "description": "Uses Amazon Rekognition to read text in image and translates for the user",
+        "memorySize": 128,
+        "timeout": 15,
+        "environment": {
+          "ENV": "environment"
+        },
+        "events": [
+          {
+            "s3": {
+              "bucket": "translate-text-from-image-853202365172-dev",
+              "event": "s3:ObjectCreated:*",
+              "rules": [
+                {
+                  "prefix": "images/"
+                }
+              ]
+            }
+          }
+        ],
+        "iamRoleStatements": [
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"TranslateIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][1]"
+          },
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"TranslateIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][2]"
+          },
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"TranslateIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][3]"
+          },
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"TranslateIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][4]"
+          },
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"TranslateIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][5]"
+          }
+        ],
+        "name": "translate-text-from-image-dev-translate",
+        "module": ".",
+        "package": {
+          "artifact": "/Users/filipebarretto/Documents/git/aws-samples/translate-text-from-image/.serverless/translate.zip"
+        },
+        "memory": 128,
+        "runtime": "python3.7",
+        "vpc": {}
+      }
+    },
+    "serviceFilename": "serverless.yml",
+    "layers": {}
+  },
+  "package": {
+    "individually": true,
+    "artifactDirectoryName": "serverless/translate-text-from-image/dev/1571907061003-2019-10-24T08:51:01.003Z",
+    "artifact": ""
+  }
+}
