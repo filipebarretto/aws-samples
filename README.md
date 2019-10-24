@@ -53,4 +53,4 @@ This sample application uses:
 
 #### Architecture
 
-![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/master/architecture-diagrams/translate-text-from-image-architecture?raw=true)
+![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/master/architecture-diagrams/translate-text-from-image-architecture.png?raw=true)
