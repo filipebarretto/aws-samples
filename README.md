@@ -22,7 +22,7 @@ This sample application uses:
 
 #### Architecture
 
-![Lambda Image Processing Architecture](https://raw.githubusercontent.com/filipebarretto/aws-samples/dev/architecture-diagrams.lambda-image-processing-achitecture.png)
+![Lambda Image Processing Architecture](https://github.com/filipebarretto/aws-samples/blob/dev/architecture-diagrams/lambda-image-processing-achitecture.png?raw=true)
 
 
 ### Translate Text from Image
