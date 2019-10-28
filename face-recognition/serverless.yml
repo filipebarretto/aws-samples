@@ -1,0 +1,134 @@
+service: face-recognition
+
+frameworkVersion: ">=1.34.0 <2.0.0"
+
+provider:
+  name: aws
+  profile: lambda-image-processing
+  runtime: python3.7
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  deploymentBucket: ${self:custom.deployment_bucket}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - lambda:GetLayerVersion
+        - lambda:PublishLayerVersion
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "arn:aws:logs:*:*:*"
+
+functions:
+  recognize:
+    handler: src/recognize.main
+    description: Uses Amazon Rekognition to recognize uploades face
+    memorySize: 128
+    timeout: 15
+    environment:
+      ENV: 'environment'
+    events:
+      - s3:
+          bucket: ${self:custom.bucket_images}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: recognize/
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - lambda:GetLayerVersion
+          - lambda:PublishLayerVersion
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "logs:CreateLogGroup"
+          - "logs:CreateLogStream"
+          - "logs:PutLogEvents"
+        Resource: "arn:aws:logs:*:*:*"
+      - Effect: "Allow"
+        Action:
+          - "s3:GetObject"
+          - "s3:GetObjectVersion"
+          - "s3:ListBucket"
+        Resource: !Join [ "", [ "arn:aws:s3:::", "${self:custom.bucket_images}", "/recognize/*" ] ]
+      - Effect: "Allow"
+        Action:
+          - "rekognition:DetectText"
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "translate:TranslateText"
+          - "comprehend:DetectDominantLanguage"
+        Resource: "*"
+
+
+  catalog:
+    handler: src/catalog.main
+    description: Uses Amazon Rekognition to recognize uploades face
+    memorySize: 128
+    timeout: 15
+    environment:
+      ENV: 'environment'
+    events:
+      - s3:
+          bucket: ${self:custom.bucket_images}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: catalog/
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - lambda:GetLayerVersion
+          - lambda:PublishLayerVersion
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "logs:CreateLogGroup"
+          - "logs:CreateLogStream"
+          - "logs:PutLogEvents"
+        Resource: "arn:aws:logs:*:*:*"
+      - Effect: "Allow"
+        Action:
+          - "s3:GetObject"
+          - "s3:GetObjectVersion"
+          - "s3:ListBucket"
+        Resource: !Join [ "", [ "arn:aws:s3:::", "${self:custom.bucket_images}", "/catalog/*" ] ]
+      - Effect: "Allow"
+        Action:
+          - "rekognition:DetectText"
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "translate:TranslateText"
+          - "comprehend:DetectDominantLanguage"
+        Resource: "*"
+    
+        
+    
+package:
+  individually: true
+  exclude:
+    - node_modules/**
+    
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  user_name: filipebarretto
+  deployment_bucket: ${self:custom.account_id}-${self:service}-deployment-bucket-${self:provider.stage}
+  account_id: ${file(./customjs/custom-account-id.js):getAccountId}
+  bucket_images: ${self:service}-${self:custom.account_id}-${self:provider.stage}
+  bucket_arn: 
+    Fn::Sub: arn:aws:s3:::${self:custom.bucket_images}
+  
+  
+plugins:
+  - serverless-python-requirements
+  - serverless-iam-roles-per-function
+  - serverless-plugin-create-deployment-bucket
+  - serverless-pseudo-parameters
