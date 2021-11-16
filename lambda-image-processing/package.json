@@ -9,7 +9,7 @@
   "author": "Filipe Barretto",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.555.0",
+    "aws-sdk": "^2.814.0",
     "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-plugin-create-deployment-bucket": "0.0.2",
     "serverless-pseudo-parameters": "^2.5.0"
